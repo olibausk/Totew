@@ -124,6 +124,25 @@ client.on("messageCreate", (message) => {
 
     message.reply(antwort);
   }
+  // !chicken – gewichtete Hühnergesundheit
+  else if (cmd === "!chicken") {
+    const zahl = Math.random() * 100;
+    let antwort = "Alle Hühner sind gesund, gute Arbeit Rancher";
+
+    if (zahl >= 80 && zahl < 85)
+      antwort =
+        "Eines deiner Lämmer wurde von Wölfen gerissen. Tragisch aber kein großer Verlust";
+    else if (zahl >= 85 && zahl < 90)
+      antwort =
+        "Unwetter haben einen Teil deines Futters zerstört. Du verlierst 100kg Futter";
+    else if (zahl >= 90 && zahl < 95)
+      antwort =
+        "Zwei deiner Schafe sind im Unwetter im Schlamm versunken. Du musst sie wieder rausholen. Leider ist die Wolle dieser Schafe ruiniert.";
+    else if (zahl >= 99)
+      antwort =
+        "Maul und Klauenseuche hat sich in deiner Farm ausgebreitet. Du verlierst 50% deiner Schafe.";
+
+    message.reply(antwort);
 });
 
 client.login(process.env.TOKEN);
