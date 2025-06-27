@@ -143,6 +143,7 @@ client.on("messageCreate", (message) => {
         "Maul und Klauenseuche hat sich in deiner Farm ausgebreitet. Du verlierst 50% deiner Schafe.";
 
     message.reply(antwort);
+  }
 });
 
 client.login(process.env.TOKEN);
