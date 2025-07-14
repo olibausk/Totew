@@ -1,4 +1,4 @@
-const keepAlive = require("./keepalive");
+econst keepAlive = require("./keepalive");
 keepAlive();
 
 const { Client, GatewayIntentBits } = require("discord.js");
@@ -20,7 +20,7 @@ client.on("messageCreate", (message) => {
   const cmd = message.content.toLowerCase();
 
   // !bid – 70/30-Entscheidung
-  if (cmd === "!bid") {
+  else if (cmd === "!bid") {
     const chance = Math.random();
     const antwort =
       chance < 0.7 ? "Hier, ich biete mit" : "Nein, da bin ich raus";
