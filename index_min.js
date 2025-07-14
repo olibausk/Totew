@@ -1,15 +1,14 @@
-// 📌 Discord-Bot
 const { Client, GatewayIntentBits } = require("discord.js");
 
-console.log("Starte Discord-Bot...");
-console.log("Eingelesenes TOKEN (gekürzt):", process.env.TOKEN?.substring(0, 10) || 'Kein Token gefunden');
+console.log("Starte Login-Test...");
+console.log("Token (gekürzt):", process.env.TOKEN?.substring(0, 10) || 'Token fehlt!');
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
+  intents: [GatewayIntentBits.Guilds],
+});
+
+client.once("ready", () => {
+  console.log(`✅ BOT ONLINE als ${client.user.tag}`);
 });
 
 client.login(process.env.TOKEN)
@@ -17,33 +16,5 @@ client.login(process.env.TOKEN)
     console.log("✅ Login erfolgreich.");
   })
   .catch(err => {
-    console.error("❌ Login fehlgeschlagen:", err);
+    console.error("❌ Login FEHLGESCHLAGEN:", err);
   });
-
-client.once("ready", () => {
-  console.log(`✅ Bot online als ${client.user.tag}`);
-});
-
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
-
-  const cmd = message.content.toLowerCase();
-  console.log(`Eingehende Nachricht erkannt: ${cmd}`);
-
-  if (cmd === "!ping") {
-    message.reply("Pong!");
-  }
-});
-
-// 📌 Dummy-Server für Render (Port offenhalten)
-const express = require('express');
-const app = express();
-
-app.get('/', (req, res) => {
-  res.send('Bot läuft.');
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`✅ Dummy-Server lauscht auf Port ${port} (nur für Render).`);
-});
