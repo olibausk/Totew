@@ -21,7 +21,7 @@ client.on("messageCreate", (message) => {
   console.log(`Eingehende Nachricht erkannt: ${cmd}`);
 
   // !bid – 70/30-Entscheidung 
-  else if (cmd === "!bid") {
+  if (cmd === "!bid") {
     const chance = Math.random();
     const antwort =
       chance < 0.7 ? "Hier, ich biete mit" : "Nein, da bin ich raus";
