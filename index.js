@@ -1,6 +1,8 @@
+// KeepAlive-Server starten (für Render)
 const keepAlive = require("./keepalive");
 keepAlive();
 
+// Discord.js einbinden
 const { Client, GatewayIntentBits } = require("discord.js");
 const client = new Client({
   intents: [
@@ -10,17 +12,27 @@ const client = new Client({
   ],
 });
 
+// Login-Start
+console.log("Starte Discord-Bot...");
+console.log("TOKEN (gekürzt):", process.env.TOKEN?.substring(0, 10) || 'Kein Token gefunden');
+
+client.login(process.env.TOKEN)
+  .then(() => console.log("✅ Login erfolgreich."))
+  .catch(err => console.error("❌ Login fehlgeschlagen:", err));
+
+// Wenn Bot online ist
 client.once("ready", () => {
   console.log(`✅ Bot online als ${client.user.tag}`);
 });
 
+// Auf Nachrichten hören
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
   const cmd = message.content.toLowerCase();
   console.log(`Eingehende Nachricht erkannt: ${cmd}`);
 
-  // !bid – 70/30-Entscheidung 
+  // !bid – 70/30-Entscheidung
   if (cmd === "!bid") {
     const chance = Math.random();
     const antwort =
@@ -64,97 +76,30 @@ client.on("messageCreate", (message) => {
 
     message.reply(antwort);
   }
+
   // !gender – 50/50-Entscheidung
   else if (cmd === "!gender") {
     const chance = Math.random();
-    const antwort =
-      chance < 0.5 ? "Weiblich" : "Männlich";
+    const antwort = chance < 0.5 ? "Weiblich" : "Männlich";
     message.reply(antwort);
   }
-  // !horse – gewichtete Pferdegesundheit
+
+  // !horse
   else if (cmd === "!horse") {
     const zahl = Math.random() * 100;
     let antwort = "Dein Pferd ist gesund, guten Ritt Cowboy";
 
     if (zahl >= 80 && zahl < 85)
-      antwort =
-        "Dein Pferd hat ein lockeres Eisen. Reite höchsten im Trabtempo zum Schmied um das richten zu lassen.";
+      antwort = "Dein Pferd hat ein lockeres Eisen. Reite höchsten im Trabtempo zum Schmied.";
     else if (zahl >= 85 && zahl < 90)
-      antwort =
-        "Dein Pferd hat ein Eisen verloren. Du musst es zum Schmied führen um das beheben zu lassen. Setzt du dich drauf könnte das schwerwiegende Folgen für dein Pferd haben.";
+      antwort = "Dein Pferd hat ein Eisen verloren. Führ es zum Schmied.";
     else if (zahl >= 90 && zahl < 95)
-      antwort =
-        "Dein Pferd lahmt ein wenig. Du solltest ihm für 2 Tage absolute Ruhe gönnen, danach ist es bestimmt wieder gesund.";
+      antwort = "Dein Pferd lahmt etwas. 2 Tage Ruhe.";
     else if (zahl >= 95)
-      antwort =
-        "Dein Pferd läuft auf drei Beinen, holy Shit. Diese (RP)Woche kannst du es beim besten Willen nicht reiten.";
+      antwort = "Dein Pferd läuft auf drei Beinen. Diese Woche nicht reitbar.";
 
     message.reply(antwort);
   }
-  // !cattle – gewichtete Rindergesundheit
-  else if (cmd === "!cattle") {
-    const zahl = Math.random() * 100;
-    let antwort = "Alle Rinder sind gesund, gute Arbeit Rancher";
 
-    if (zahl >= 80 && zahl < 85)
-      antwort =
-        "Eines deiner Kälber wurde von Wölfen gerissen. Tragisch aber kein großer Verlust";
-    else if (zahl >= 85 && zahl < 90)
-      antwort =
-        "Unwetter haben einen Teil deines Futters zerstört. Du verlierst 100kg Futter";
-    else if (zahl >= 90 && zahl < 95)
-      antwort =
-        "Eine Stampede wurde ausgelöst. Du musst die Rinder wiederfinden und zurück treiben. Eine tragende Kuh hat ihr Kalb verloren.";
-    else if (zahl >= 99)
-      antwort =
-        "Maul und Klauenseuche hat sich in deiner Farm ausgebreitet. Du verlierst 50% deiner Rinder.";
-
-    message.reply(antwort);
-  }
-  // !sheep – gewichtete Schafgesundheit
-  else if (cmd === "!sheep") {
-    const zahl = Math.random() * 100;
-    let antwort = "Alle Schafe sind gesund, gute Arbeit Rancher";
-
-    if (zahl >= 80 && zahl < 85)
-      antwort =
-        "Eines deiner Lämmer wurde von Wölfen gerissen. Tragisch aber kein großer Verlust";
-    else if (zahl >= 85 && zahl < 90)
-      antwort =
-        "Unwetter haben einen Teil deines Futters zerstört. Du verlierst 100kg Futter";
-    else if (zahl >= 90 && zahl < 95)
-      antwort =
-        "Zwei deiner Schafe sind im Unwetter im Schlamm versunken. Du musst sie wieder rausholen. Leider ist die Wolle dieser Schafe ruiniert.";
-    else if (zahl >= 99)
-      antwort =
-        "Maul und Klauenseuche hat sich in deiner Farm ausgebreitet. Du verlierst 50% deiner Schafe.";
-
-    message.reply(antwort);
-  }
-  // !chicken – gewichtete Hühnergesundheit
-  else if (cmd === "!chicken") {
-    const zahl = Math.random() * 100;
-    let antwort = "Alle Hühner sind gesund, gute Arbeit Rancher";
-
-    if (zahl >= 80 && zahl < 85)
-      antwort =
-        "Eines deiner Lämmer wurde von Wölfen gerissen. Tragisch aber kein großer Verlust";
-    else if (zahl >= 85 && zahl < 90)
-      antwort =
-        "Unwetter haben einen Teil deines Futters zerstört. Du verlierst 100kg Futter";
-    else if (zahl >= 90 && zahl < 95)
-      antwort =
-        "Zwei deiner Schafe sind im Unwetter im Schlamm versunken. Du musst sie wieder rausholen. Leider ist die Wolle dieser Schafe ruiniert.";
-    else if (zahl >= 99)
-      antwort =
-        "Maul und Klauenseuche hat sich in deiner Farm ausgebreitet. Du verlierst 50% deiner Schafe.";
-
-    message.reply(antwort);
-  }
+  // Weitere Befehle hier einfügen...
 });
-
-console.log("Versuche, Bot mit Token zu starten...");
-console.log("Eingelesenes TOKEN (aus Sicherheitsgründen gekürzt):", process.env.TOKEN?.substring(0, 10) || 'Kein Token gefunden');
-client.login(process.env.TOKEN)
-  .then(() => console.log("✅ Login erfolgreich."))
-  .catch(err => console.error("❌ Login fehlgeschlagen:", err));
