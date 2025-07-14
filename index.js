@@ -20,7 +20,7 @@ client.on("messageCreate", (message) => {
   const cmd = message.content.toLowerCase();
   console.log(`Eingehende Nachricht erkannt: ${cmd}`);
 
-  // !bid – 70/30-Entscheidung
+  // !bid – 70/30-Entscheidung 
   else if (cmd === "!bid") {
     const chance = Math.random();
     const antwort =
@@ -65,7 +65,7 @@ client.on("messageCreate", (message) => {
     message.reply(antwort);
   }
   // !sex – 50/50-Entscheidung
-  if (cmd === "!sex") {
+  else if (cmd === "!sex") {
     const chance = Math.random();
     const antwort =
       chance < 0.5 ? "Weiblich" : "Männlich";
