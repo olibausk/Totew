@@ -64,8 +64,8 @@ client.on("messageCreate", (message) => {
 
     message.reply(antwort);
   }
-  // !sex – 50/50-Entscheidung
-  else if (cmd === "!sex") {
+  // !gender – 50/50-Entscheidung
+  else if (cmd === "!gender") {
     const chance = Math.random();
     const antwort =
       chance < 0.5 ? "Weiblich" : "Männlich";
