@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node index.js"
+    "start": "node index_min.js"
   },
   "dependencies": {
     "discord.js": "^14.11.0",
