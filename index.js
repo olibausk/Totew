@@ -154,7 +154,7 @@ client.on("messageCreate", (message) => {
 });
 
 console.log("Versuche, Bot mit Token zu starten...");
-
+console.log("Eingelesenes TOKEN (aus Sicherheitsgründen gekürzt):", process.env.TOKEN?.substring(0, 10) || 'Kein Token gefunden');
 client.login(process.env.TOKEN)
   .then(() => console.log("✅ Login erfolgreich."))
   .catch(err => console.error("❌ Login fehlgeschlagen:", err));
