@@ -1,4 +1,4 @@
-econst keepAlive = require("./keepalive");
+const keepAlive = require("./keepalive");
 keepAlive();
 
 const { Client, GatewayIntentBits } = require("discord.js");
