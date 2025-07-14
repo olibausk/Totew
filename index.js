@@ -152,5 +152,9 @@ client.on("messageCreate", (message) => {
     message.reply(antwort);
   }
 });
+
 console.log("Versuche, Bot mit Token zu starten...");
-client.login(process.env.TOKEN);
+
+client.login(process.env.TOKEN)
+  .then(() => console.log("✅ Login erfolgreich."))
+  .catch(err => console.error("❌ Login fehlgeschlagen:", err));
