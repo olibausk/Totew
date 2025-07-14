@@ -152,5 +152,5 @@ client.on("messageCreate", (message) => {
     message.reply(antwort);
   }
 });
-
+console.log("Versuche, Bot mit Token zu starten...");
 client.login(process.env.TOKEN);
