@@ -63,7 +63,13 @@ client.on("messageCreate", (message) => {
 
     message.reply(antwort);
   }
-
+  // !sex – 50/50-Entscheidung
+  if (cmd === "!sex") {
+    const chance = Math.random();
+    const antwort =
+      chance < 0.5 ? "Weiblich" : "Männlich";
+    message.reply(antwort);
+  }
   // !horse – gewichtete Pferdegesundheit
   else if (cmd === "!horse") {
     const zahl = Math.random() * 100;
