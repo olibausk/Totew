@@ -32,4 +32,16 @@ client.on("messageCreate", (message) => {
   if (cmd === "!ping") {
     message.reply("Pong!");
   }
+// Dummy-Server nur für Render (verhindert Port-Timeout)
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.send('Bot läuft.');
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`✅ Dummy-Server lauscht auf Port ${port} (nur für Render).`);
+});
 });
