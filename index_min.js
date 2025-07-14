@@ -1,3 +1,4 @@
+// 📌 Discord-Bot
 const { Client, GatewayIntentBits } = require("discord.js");
 
 console.log("Starte Discord-Bot...");
@@ -32,7 +33,9 @@ client.on("messageCreate", (message) => {
   if (cmd === "!ping") {
     message.reply("Pong!");
   }
-// Dummy-Server nur für Render (verhindert Port-Timeout)
+});
+
+// 📌 Dummy-Server für Render (Port offenhalten)
 const express = require('express');
 const app = express();
 
@@ -43,5 +46,4 @@ app.get('/', (req, res) => {
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`✅ Dummy-Server lauscht auf Port ${port} (nur für Render).`);
-});
 });
