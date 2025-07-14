@@ -18,6 +18,7 @@ client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
   const cmd = message.content.toLowerCase();
+  console.log(`Eingehende Nachricht erkannt: ${cmd}`);
 
   // !bid – 70/30-Entscheidung
   else if (cmd === "!bid") {
