@@ -116,6 +116,13 @@ client.on("messageCreate", (message) => {
 
     message.reply(antwort);
   }
+
+    // !start
+  else if (cmd === "!start") {
+    const authorMention = `<@${message.author.id}>`;
+    const antwort = `Lobby ist eröffnet <@&1407670349855723630> Die Welt liegt euch bei ${authorMention} zu Füßen`;
+    message.channel.send(antwort);
+  }
 });
 
 client.login(process.env.TOKEN)
