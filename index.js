@@ -120,7 +120,7 @@ client.on("messageCreate", (message) => {
     // !start
   else if (cmd === "!start") {
     const authorMention = `<@${message.author.id}>`;
-    const antwort = `Lobby ist eröffnet <@&1407670349855723630> Die Welt liegt euch bei ${authorMention} zu Füßen`;
+    const antwort = `Lobby ist eröffnet <@&1342787380352127078> Die Welt liegt euch bei ${authorMention} zu Füßen`;
     message.channel.send(antwort);
   }
 });
