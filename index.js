@@ -38,7 +38,40 @@ client.on("messageCreate", (message) => {
     const antwort = Math.random() < 0.7 ? "Hier, ich biete mit" : "Nein, da bin ich raus";
     message.reply(antwort);
   }
+  // !buycattle [Rasse] [Geschlecht] [Alter]
+  else if (cmd.startsWith("!buycattle")) {
+    const parts = message.content.trim().split(/\s+/);
+    if (parts.length !== 4) {
+      return message.reply("Verwendung: !buycattle [BlackAngus|FloridaCracker] [Bulle|Kuh] [1|3|5]");
+    }
 
+    const rasse = parts[1];
+    const geschlecht = parts[2];
+    const alter = parts[3];
+
+    const preise = {
+      BlackAngus: {
+        Bulle: { "1": 50, "3": 80, "5": 70 },
+        Kuh: { "1": 40, "3": 70, "5": 60 },
+      },
+      FloridaCracker: {
+        Bulle: { "1": 40, "3": 65, "5": 50 },
+        Kuh: { "1": 30, "3": 45, "5": 35 },
+      },
+    };
+
+    if (!preise[rasse] || !preise[rasse][geschlecht] || !preise[rasse][geschlecht][alter]) {
+      return message.reply("Ungültige Auswahl. Bitte überprüfe Rasse, Geschlecht und Alter.");
+    }
+
+    const basispreis = preise[rasse][geschlecht][alter];
+    const abweichung = Math.floor(Math.random() * 31) - 15; // -15 bis +15
+    const finalpreis = basispreis + abweichung;
+
+    return message.reply(
+      `📦 Gekauftes Rind: **${rasse}**, **${geschlecht}**, **${alter} Jahre**\n💲 Preis: **${finalpreis}$**`
+    );
+  }
   // !pricenpchorse
   else if (cmd === "!pricenpchorse") {
     const roll = Math.random() * 100;
