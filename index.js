@@ -1,4 +1,7 @@
+// 🔹 .env einlesen
 require('dotenv').config();
+
+// 🔹 Dummy-Webserver (für Render / Healthcheck)
 const express = require("express");
 const app = express();
 
@@ -11,7 +14,7 @@ app.listen(PORT, () => {
   console.log(`✅ Dummy-Webserver läuft auf Port ${PORT} (für Render).`);
 });
 
-// BOT-LOGIK
+// 🔹 Discord-Bot
 const { Client, GatewayIntentBits } = require("discord.js");
 const client = new Client({
   intents: [
@@ -21,6 +24,7 @@ const client = new Client({
   ],
 });
 
+// Debug-Ausgaben
 console.log("Starte Discord-Bot...");
 console.log("TOKEN (gekürzt):", process.env.TOKEN?.substring(0, 10) || "Kein Token gefunden");
 
@@ -39,6 +43,7 @@ client.on("messageCreate", (message) => {
     const antwort = Math.random() < 0.7 ? "Hier, ich biete mit" : "Nein, da bin ich raus";
     message.reply(antwort);
   }
+
   // !buycattle [Rasse] [Geschlecht] [Alter]
   else if (cmd.startsWith("!buycattle")) {
     const parts = message.content.trim().split(/\s+/);
@@ -73,6 +78,7 @@ client.on("messageCreate", (message) => {
       `📦 Gekauftes Rind: **${rasse}**, **${geschlecht}**, **${alter} Jahre**\n💲 Preis: **${finalpreis}$**`
     );
   }
+
   // !pricenpchorse
   else if (cmd === "!pricenpchorse") {
     const roll = Math.random() * 100;
@@ -151,7 +157,7 @@ client.on("messageCreate", (message) => {
     message.reply(antwort);
   }
 
-    // !start
+  // !start
   else if (cmd === "!start") {
     const authorMention = `<@${message.author.id}>`;
     const antwort = `Lobby ist eröffnet <@&1342787380352127078> Die Welt liegt euch bei ${authorMention} zu Füßen`;
@@ -159,6 +165,7 @@ client.on("messageCreate", (message) => {
   }
 });
 
+// Login mit Token
 client.login(process.env.TOKEN)
   .then(() => console.log("✅ Login erfolgreich."))
   .catch(err => console.error("❌ Login fehlgeschlagen:", err));
