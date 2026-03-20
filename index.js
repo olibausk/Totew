@@ -99,10 +99,8 @@ const horseEvents = [
 // 🔹 Party-Texte
 const partyTexts = [
   `🎉 <@&${CITIZEN_ROLE_ID}> Die Party ist eröffnet!`,
-  `🥃 <@&${CITIZEN_ROLE_ID}> Auf zur Feier, die Party hat begonnen!`,
-  `🎶 <@&${CITIZEN_ROLE_ID}> Die Party ist eröffnet – kommt zusammen und feiert!`,
-  `🍻 <@&${CITIZEN_ROLE_ID}> Die Feier beginnt, die Party ist hiermit eröffnet!`,
-  `🎊 <@&${CITIZEN_ROLE_ID}> Bürger, die Party ist eröffnet!`,
+  `🥃 <@&${CITIZEN_ROLE_ID}> Auf gehts, die Party hat begonnen!`,
+  `🎶 <@&${CITIZEN_ROLE_ID}> Die Party ist eröffnet – kommt zusammen!`,
 ];
 
 function pickRandom(arr) {
