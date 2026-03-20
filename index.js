@@ -28,7 +28,7 @@ const client = new Client({
 const TEST_COMMAND_CHANNEL_ID = "1385187552339689513";
 const TEST_SOURCE_CHANNEL_ID = "953568411357691916";
 
-// 🔹 Krankheiten / leichte Verletzungen für !test
+// 🔹 Krankheiten / leichte Verletzungen für !testtotew
 const healthEvents = [
   "Erkältung",
   "Husten",
@@ -247,8 +247,8 @@ client.on("messageCreate", async (message) => {
     message.channel.send(antwort);
   }
 
-  // !test
-  else if (cmd === "!test") {
+  // !testtotew
+  else if (cmd === "!testtotew") {
     if (message.channel.id !== TEST_COMMAND_CHANNEL_ID) {
       return;
     }
