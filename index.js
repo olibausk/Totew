@@ -80,28 +80,18 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Liest alle Nachrichten aus dem Such-Channel und zählt jeden Autor nur einmal.
-// Bots werden dabei ausdrücklich NICHT ignoriert.
+// Für den Test nur die letzten 100 Nachrichten lesen.
+// Jeder Autor zählt nur einmal.
+// Bots werden NICHT ignoriert.
 async function getUniqueParticipants(channel) {
   const uniqueUsers = new Map();
-  let lastId;
 
-  while (true) {
-    const options = { limit: 100 };
-    if (lastId) options.before = lastId;
+  const messages = await channel.messages.fetch({ limit: 100 });
 
-    const messages = await channel.messages.fetch(options);
-    if (!messages.size) break;
-
-    for (const msg of messages.values()) {
-      if (!uniqueUsers.has(msg.author.id)) {
-        uniqueUsers.set(msg.author.id, msg.author);
-      }
+  for (const msg of messages.values()) {
+    if (!uniqueUsers.has(msg.author.id)) {
+      uniqueUsers.set(msg.author.id, msg.author);
     }
-
-    lastId = messages.last().id;
-
-    if (messages.size < 100) break;
   }
 
   return Array.from(uniqueUsers.values());
@@ -124,7 +114,7 @@ client.on("messageCreate", async (message) => {
   // !bid
   if (cmd === "!bid") {
     const antwort = Math.random() < 0.7 ? "Hier, ich biete mit" : "Nein, da bin ich raus";
-    message.reply(antwort);
+    return message.reply(antwort);
   }
 
   // !buycattle [Rasse] [Geschlecht] [Alter]
@@ -154,7 +144,7 @@ client.on("messageCreate", async (message) => {
     }
 
     const basispreis = preise[rasse][geschlecht][alter];
-    const abweichung = Math.floor(Math.random() * 31) - 15; // -15 bis +15
+    const abweichung = Math.floor(Math.random() * 31) - 15;
     const finalpreis = basispreis + abweichung;
 
     return message.reply(
@@ -192,13 +182,13 @@ client.on("messageCreate", async (message) => {
       antwort = varianten[Math.floor(Math.random() * varianten.length)];
     }
 
-    message.reply(antwort);
+    return message.reply(antwort);
   }
 
   // !gender
   else if (cmd === "!gender") {
     const antwort = Math.random() < 0.5 ? "Weiblich" : "Männlich";
-    message.reply(antwort);
+    return message.reply(antwort);
   }
 
   // !horse
@@ -211,7 +201,7 @@ client.on("messageCreate", async (message) => {
     else if (zahl >= 90 && zahl < 95) antwort = "Dein Pferd lahmt leicht. Zwei Tage Ruhe und es sollte wieder fit sein.";
     else if (zahl >= 95) antwort = "Dein Pferd läuft auf drei Beinen. Diese (RP)Woche solltest du es nicht reiten.";
 
-    message.reply(antwort);
+    return message.reply(antwort);
   }
 
   // !cattle
@@ -224,7 +214,7 @@ client.on("messageCreate", async (message) => {
     else if (zahl >= 90 && zahl < 95) antwort = "Eine Stampede hat Chaos verursacht. Kühe verloren Kalb, du musst die Herde zusammentreiben.";
     else if (zahl >= 99) antwort = "Maul- und Klauenseuche! 50% deiner Rinder müssen gekeult werden.";
 
-    message.reply(antwort);
+    return message.reply(antwort);
   }
 
   // !sheep
@@ -237,44 +227,60 @@ client.on("messageCreate", async (message) => {
     else if (zahl >= 90 && zahl < 95) antwort = "Zwei Schafe sind im Schlamm versunken. Die Wolle ist ruiniert.";
     else if (zahl >= 99) antwort = "Maul- und Klauenseuche! 50% deiner Schafe sind betroffen.";
 
-    message.reply(antwort);
+    return message.reply(antwort);
   }
 
   // !start
   else if (cmd === "!start") {
     const authorMention = `<@${message.author.id}>`;
     const antwort = `Lobby ist eröffnet <@&1342787380352127078> Die Welt liegt euch bei ${authorMention} zu Füßen`;
-    message.channel.send(antwort);
+    return message.channel.send(antwort);
   }
 
   // !testtotew
   else if (cmd === "!testtotew") {
+    console.log("✅ !testtotew erkannt");
+    console.log("Nachrichten-Channel:", message.channel.id);
+    console.log("Erlaubter Command-Channel:", TEST_COMMAND_CHANNEL_ID);
+
     if (message.channel.id !== TEST_COMMAND_CHANNEL_ID) {
+      console.log("❌ Falscher Channel");
       return;
     }
 
     try {
+      console.log("🔍 Hole Source-Channel...");
       const sourceChannel = await client.channels.fetch(TEST_SOURCE_CHANNEL_ID);
+      console.log("Source-Channel gefunden:", !!sourceChannel);
 
       if (!sourceChannel || !sourceChannel.isTextBased()) {
+        console.log("❌ Source-Channel ungültig");
         return message.reply("Der Such-Channel konnte nicht gefunden werden oder ist nicht textbasiert.");
       }
 
+      console.log("📨 Lese Teilnehmer...");
       const participants = await getUniqueParticipants(sourceChannel);
+      console.log("Teilnehmer gefunden:", participants.length);
 
       if (!participants.length) {
+        console.log("❌ Keine Teilnehmer gefunden");
         return message.reply("Es wurden keine Teilnehmer im Such-Channel gefunden.");
       }
 
       const selectedUser = pickRandom(participants);
       const selectedEvent = pickRandom(healthEvents);
 
+      console.log("🎯 Ausgewählter User:", selectedUser.id);
+      console.log("🩺 Ausgewähltes Event:", selectedEvent);
+
       await message.channel.send(
         `⚕️ <@${selectedUser.id}> ist betroffen von: **${selectedEvent}**`
       );
+
+      console.log("✅ Testnachricht gesendet");
     } catch (error) {
-      console.error("Fehler bei !test:", error);
-      await message.reply("Beim Ausführen von !test ist ein Fehler aufgetreten.");
+      console.error("Fehler bei !testtotew:", error);
+      await message.reply("Beim Ausführen von !testtotew ist ein Fehler aufgetreten.");
     }
   }
 });
