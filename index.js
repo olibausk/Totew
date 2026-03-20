@@ -28,7 +28,18 @@ const client = new Client({
 const TEST_OUTPUT_CHANNEL_ID = "1385187552339689513";
 const TEST_SOURCE_CHANNEL_ID = "953568411357691916";
 
-// 🔹 Krankheiten / leichte Verletzungen für !testtotew
+const RP_SOURCE_CHANNEL_ID = "1342631720423526511";
+const RP_OUTPUT_CHANNEL_ID = "1472654200788877322";
+
+// 🔹 Ausschluss für !horse und !health
+const EXCLUDED_USER_IDS = new Set([
+  "1352579445629915189",
+]);
+
+// 🔹 Rollen
+const CITIZEN_ROLE_ID = "1342787380352127078";
+
+// 🔹 Krankheiten / leichte Verletzungen für !health und !testtotew
 const healthEvents = [
   "Erkältung",
   "Husten",
@@ -76,19 +87,51 @@ const healthEvents = [
   "Tiefer Splitter in der Hand",
 ];
 
+// 🔹 Pferdegesundheit für !horse
+const horseEvents = [
+  "Pferd ist gesund, guten Ritt Cowboy.",
+  "hat ein lockeres Eisen. Reite höchstens im Trabtempo zum Schmied.",
+  "hat ein Eisen verloren. Führe es zum Schmied. Reiten wäre riskant.",
+  "dessen Pferd lahmt leicht. Zwei Tage Ruhe und es sollte wieder fit sein.",
+  "dessen Pferd auf drei Beinen läuft. Diese (RP)Woche sollte es nicht geritten werden.",
+];
+
+// 🔹 Party-Texte
+const partyTexts = [
+  `🎉 <@&${CITIZEN_ROLE_ID}> Die Party ist eröffnet!`,
+  `🥃 <@&${CITIZEN_ROLE_ID}> Auf zur Feier, die Party hat begonnen!`,
+  `🎶 <@&${CITIZEN_ROLE_ID}> Die Party ist eröffnet – kommt zusammen und feiert!`,
+  `🍻 <@&${CITIZEN_ROLE_ID}> Die Feier beginnt, die Party ist hiermit eröffnet!`,
+  `🎊 <@&${CITIZEN_ROLE_ID}> Bürger, die Party ist eröffnet!`,
+];
+
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Für den Test nur die letzten 100 Nachrichten lesen.
-// Jeder Autor zählt nur einmal.
-// Bots werden NICHT ignoriert.
+// 🔹 Für den Test: letzte 100 Nachrichten, Bots NICHT ignorieren
 async function getUniqueParticipants(channel) {
   const uniqueUsers = new Map();
-
   const messages = await channel.messages.fetch({ limit: 100 });
 
   for (const msg of messages.values()) {
+    if (!uniqueUsers.has(msg.author.id)) {
+      uniqueUsers.set(msg.author.id, msg.author);
+    }
+  }
+
+  return Array.from(uniqueUsers.values());
+}
+
+// 🔹 Für !horse und !health: letzte 100 Nachrichten, Bots und bestimmte User ausgeschlossen
+async function getEligibleParticipants(channel) {
+  const uniqueUsers = new Map();
+  const messages = await channel.messages.fetch({ limit: 100 });
+
+  for (const msg of messages.values()) {
+    if (msg.author.bot) continue;
+    if (EXCLUDED_USER_IDS.has(msg.author.id)) continue;
+
     if (!uniqueUsers.has(msg.author.id)) {
       uniqueUsers.set(msg.author.id, msg.author);
     }
@@ -193,15 +236,80 @@ client.on("messageCreate", async (message) => {
 
   // !horse
   else if (cmd === "!horse") {
-    const zahl = Math.random() * 100;
-    let antwort = "Dein Pferd ist gesund, guten Ritt Cowboy";
+    try {
+      console.log("✅ !horse erkannt");
 
-    if (zahl >= 80 && zahl < 85) antwort = "Dein Pferd hat ein lockeres Eisen. Reite höchstens im Trabtempo zum Schmied.";
-    else if (zahl >= 85 && zahl < 90) antwort = "Dein Pferd hat ein Eisen verloren. Führe es zum Schmied. Reiten wäre riskant.";
-    else if (zahl >= 90 && zahl < 95) antwort = "Dein Pferd lahmt leicht. Zwei Tage Ruhe und es sollte wieder fit sein.";
-    else if (zahl >= 95) antwort = "Dein Pferd läuft auf drei Beinen. Diese (RP)Woche solltest du es nicht reiten.";
+      const sourceChannel = await client.channels.fetch(RP_SOURCE_CHANNEL_ID);
+      if (!sourceChannel || !sourceChannel.isTextBased()) {
+        return message.reply("Der Such-Channel für !horse konnte nicht gefunden werden.");
+      }
 
-    return message.reply(antwort);
+      const outputChannel = await client.channels.fetch(RP_OUTPUT_CHANNEL_ID);
+      if (!outputChannel || !outputChannel.isTextBased()) {
+        return message.reply("Der Ausgabe-Channel für !horse konnte nicht gefunden werden.");
+      }
+
+      const participants = await getEligibleParticipants(sourceChannel);
+      console.log("🐎 !horse Teilnehmer gefunden:", participants.length);
+
+      if (!participants.length) {
+        return message.reply("Es wurden keine gültigen Teilnehmer für !horse gefunden.");
+      }
+
+      const selectedUser = pickRandom(participants);
+      const selectedEvent = pickRandom(horseEvents);
+
+      let antwort = "";
+      if (selectedEvent.startsWith("Pferd ist gesund")) {
+        antwort = `🐎 <@${selectedUser.id}> – Dein ${selectedEvent}`;
+      } else if (selectedEvent.startsWith("hat")) {
+        antwort = `🐎 <@${selectedUser.id}> ${selectedEvent}`;
+      } else {
+        antwort = `🐎 <@${selectedUser.id}> ${selectedEvent}`;
+      }
+
+      await outputChannel.send(antwort);
+      console.log("✅ !horse Nachricht gesendet");
+    } catch (error) {
+      console.error("Fehler bei !horse:", error);
+      await message.reply("Beim Ausführen von !horse ist ein Fehler aufgetreten.");
+    }
+  }
+
+  // !health
+  else if (cmd === "!health") {
+    try {
+      console.log("✅ !health erkannt");
+
+      const sourceChannel = await client.channels.fetch(RP_SOURCE_CHANNEL_ID);
+      if (!sourceChannel || !sourceChannel.isTextBased()) {
+        return message.reply("Der Such-Channel für !health konnte nicht gefunden werden.");
+      }
+
+      const outputChannel = await client.channels.fetch(RP_OUTPUT_CHANNEL_ID);
+      if (!outputChannel || !outputChannel.isTextBased()) {
+        return message.reply("Der Ausgabe-Channel für !health konnte nicht gefunden werden.");
+      }
+
+      const participants = await getEligibleParticipants(sourceChannel);
+      console.log("⚕️ !health Teilnehmer gefunden:", participants.length);
+
+      if (!participants.length) {
+        return message.reply("Es wurden keine gültigen Teilnehmer für !health gefunden.");
+      }
+
+      const selectedUser = pickRandom(participants);
+      const selectedEvent = pickRandom(healthEvents);
+
+      await outputChannel.send(
+        `⚕️ <@${selectedUser.id}> ist betroffen von: **${selectedEvent}**`
+      );
+
+      console.log("✅ !health Nachricht gesendet");
+    } catch (error) {
+      console.error("Fehler bei !health:", error);
+      await message.reply("Beim Ausführen von !health ist ein Fehler aufgetreten.");
+    }
   }
 
   // !cattle
@@ -233,7 +341,13 @@ client.on("messageCreate", async (message) => {
   // !start
   else if (cmd === "!start") {
     const authorMention = `<@${message.author.id}>`;
-    const antwort = `Lobby ist eröffnet <@&1342787380352127078> Die Welt liegt euch bei ${authorMention} zu Füßen`;
+    const antwort = `Lobby ist eröffnet <@&${CITIZEN_ROLE_ID}> Die Welt liegt euch bei ${authorMention} zu Füßen`;
+    return message.channel.send(antwort);
+  }
+
+  // !party
+  else if (cmd === "!party") {
+    const antwort = pickRandom(partyTexts);
     return message.channel.send(antwort);
   }
 
@@ -245,30 +359,24 @@ client.on("messageCreate", async (message) => {
     console.log("Ausgabe-Channel:", TEST_OUTPUT_CHANNEL_ID);
 
     try {
-      console.log("🔍 Hole Source-Channel...");
       const sourceChannel = await client.channels.fetch(TEST_SOURCE_CHANNEL_ID);
       console.log("Source-Channel gefunden:", !!sourceChannel);
 
       if (!sourceChannel || !sourceChannel.isTextBased()) {
-        console.log("❌ Source-Channel ungültig");
         return message.reply("Der Such-Channel konnte nicht gefunden werden oder ist nicht textbasiert.");
       }
 
-      console.log("📨 Lese Teilnehmer...");
       const participants = await getUniqueParticipants(sourceChannel);
       console.log("Teilnehmer gefunden:", participants.length);
 
       if (!participants.length) {
-        console.log("❌ Keine Teilnehmer gefunden");
         return message.reply("Es wurden keine Teilnehmer im Such-Channel gefunden.");
       }
 
-      console.log("📢 Hole Ausgabe-Channel...");
       const outputChannel = await client.channels.fetch(TEST_OUTPUT_CHANNEL_ID);
       console.log("Ausgabe-Channel gefunden:", !!outputChannel);
 
       if (!outputChannel || !outputChannel.isTextBased()) {
-        console.log("❌ Ausgabe-Channel ungültig");
         return message.reply("Der Ausgabe-Channel konnte nicht gefunden werden oder ist nicht textbasiert.");
       }
 
