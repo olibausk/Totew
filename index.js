@@ -24,8 +24,8 @@ const client = new Client({
   ],
 });
 
-// 🔹 Test-Channel-Konfiguration
-const TEST_COMMAND_CHANNEL_ID = "1385187552339689513";
+// 🔹 Channel-Konfiguration
+const TEST_OUTPUT_CHANNEL_ID = "1385187552339689513";
 const TEST_SOURCE_CHANNEL_ID = "953568411357691916";
 
 // 🔹 Krankheiten / leichte Verletzungen für !testtotew
@@ -240,13 +240,9 @@ client.on("messageCreate", async (message) => {
   // !testtotew
   else if (cmd === "!testtotew") {
     console.log("✅ !testtotew erkannt");
-    console.log("Nachrichten-Channel:", message.channel.id);
-    console.log("Erlaubter Command-Channel:", TEST_COMMAND_CHANNEL_ID);
-
-    if (message.channel.id !== TEST_COMMAND_CHANNEL_ID) {
-      console.log("❌ Falscher Channel");
-      return;
-    }
+    console.log("Ausgelöst in Channel:", message.channel.id);
+    console.log("Such-Channel:", TEST_SOURCE_CHANNEL_ID);
+    console.log("Ausgabe-Channel:", TEST_OUTPUT_CHANNEL_ID);
 
     try {
       console.log("🔍 Hole Source-Channel...");
@@ -267,17 +263,26 @@ client.on("messageCreate", async (message) => {
         return message.reply("Es wurden keine Teilnehmer im Such-Channel gefunden.");
       }
 
+      console.log("📢 Hole Ausgabe-Channel...");
+      const outputChannel = await client.channels.fetch(TEST_OUTPUT_CHANNEL_ID);
+      console.log("Ausgabe-Channel gefunden:", !!outputChannel);
+
+      if (!outputChannel || !outputChannel.isTextBased()) {
+        console.log("❌ Ausgabe-Channel ungültig");
+        return message.reply("Der Ausgabe-Channel konnte nicht gefunden werden oder ist nicht textbasiert.");
+      }
+
       const selectedUser = pickRandom(participants);
       const selectedEvent = pickRandom(healthEvents);
 
       console.log("🎯 Ausgewählter User:", selectedUser.id);
       console.log("🩺 Ausgewähltes Event:", selectedEvent);
 
-      await message.channel.send(
+      await outputChannel.send(
         `⚕️ <@${selectedUser.id}> ist betroffen von: **${selectedEvent}**`
       );
 
-      console.log("✅ Testnachricht gesendet");
+      console.log("✅ Testnachricht im Ausgabe-Channel gesendet");
     } catch (error) {
       console.error("Fehler bei !testtotew:", error);
       await message.reply("Beim Ausführen von !testtotew ist ein Fehler aufgetreten.");
