@@ -24,6 +24,89 @@ const client = new Client({
   ],
 });
 
+// 🔹 Test-Channel-Konfiguration
+const TEST_COMMAND_CHANNEL_ID = "1385187552339689513";
+const TEST_SOURCE_CHANNEL_ID = "953568411357691916";
+
+// 🔹 Krankheiten / leichte Verletzungen für !test
+const healthEvents = [
+  "Erkältung",
+  "Husten",
+  "Bronchitis",
+  "Heiserkeit",
+  "Halsschmerzen",
+  "Schnupfen",
+  "Fieber",
+  "Schüttelfrost",
+  "Abgeschlagenheit",
+  "Kreislaufschwäche",
+  "Schwindel",
+  "Müdigkeit",
+  "Erschöpfung",
+  "Magenverstimmung",
+  "Durchfall",
+  "Verstopfung",
+  "Übelkeit",
+  "Lebensmittelvergiftung",
+  "Bauchkrämpfe",
+  "Kopfschmerzen",
+  "Migräne",
+  "Konzentrationsprobleme",
+  "Nervosität",
+  "Zittern",
+  "Sonnenstich",
+  "Dehydration",
+  "Unterkühlung",
+  "Allergische Reaktion",
+  "Entzündete Insektenstiche",
+  "Verstauchter Knöchel",
+  "Verstauchtes Handgelenk",
+  "Zerrung im Bein",
+  "Zerrung im Rücken",
+  "Starker Muskelkater",
+  "Geprelltes Knie",
+  "Prellung an der Schulter",
+  "Geprellte Rippe",
+  "Prellung am Rücken",
+  "Starker Bluterguss",
+  "Schnittwunde an der Hand",
+  "Schnitt am Unterarm",
+  "Kleinere Stichverletzung",
+  "Eingerissene Haut",
+  "Tiefer Splitter in der Hand",
+];
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Liest alle Nachrichten aus dem Such-Channel und zählt jeden Autor nur einmal.
+// Bots werden dabei ausdrücklich NICHT ignoriert.
+async function getUniqueParticipants(channel) {
+  const uniqueUsers = new Map();
+  let lastId;
+
+  while (true) {
+    const options = { limit: 100 };
+    if (lastId) options.before = lastId;
+
+    const messages = await channel.messages.fetch(options);
+    if (!messages.size) break;
+
+    for (const msg of messages.values()) {
+      if (!uniqueUsers.has(msg.author.id)) {
+        uniqueUsers.set(msg.author.id, msg.author);
+      }
+    }
+
+    lastId = messages.last().id;
+
+    if (messages.size < 100) break;
+  }
+
+  return Array.from(uniqueUsers.values());
+}
+
 // Debug-Ausgaben
 console.log("Starte Discord-Bot...");
 console.log("TOKEN (gekürzt):", process.env.TOKEN?.substring(0, 10) || "Kein Token gefunden");
@@ -32,7 +115,7 @@ client.once("ready", () => {
   console.log(`✅ Bot online als ${client.user.tag}`);
 });
 
-client.on("messageCreate", (message) => {
+client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
   const cmd = message.content.toLowerCase();
@@ -162,6 +245,37 @@ client.on("messageCreate", (message) => {
     const authorMention = `<@${message.author.id}>`;
     const antwort = `Lobby ist eröffnet <@&1342787380352127078> Die Welt liegt euch bei ${authorMention} zu Füßen`;
     message.channel.send(antwort);
+  }
+
+  // !test
+  else if (cmd === "!test") {
+    if (message.channel.id !== TEST_COMMAND_CHANNEL_ID) {
+      return;
+    }
+
+    try {
+      const sourceChannel = await client.channels.fetch(TEST_SOURCE_CHANNEL_ID);
+
+      if (!sourceChannel || !sourceChannel.isTextBased()) {
+        return message.reply("Der Such-Channel konnte nicht gefunden werden oder ist nicht textbasiert.");
+      }
+
+      const participants = await getUniqueParticipants(sourceChannel);
+
+      if (!participants.length) {
+        return message.reply("Es wurden keine Teilnehmer im Such-Channel gefunden.");
+      }
+
+      const selectedUser = pickRandom(participants);
+      const selectedEvent = pickRandom(healthEvents);
+
+      await message.channel.send(
+        `⚕️ <@${selectedUser.id}> ist betroffen von: **${selectedEvent}**`
+      );
+    } catch (error) {
+      console.error("Fehler bei !test:", error);
+      await message.reply("Beim Ausführen von !test ist ein Fehler aufgetreten.");
+    }
   }
 });
 
